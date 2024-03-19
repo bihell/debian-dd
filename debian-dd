@@ -93,9 +93,12 @@ d-i netcfg/get_nameservers string 1.1.1.1,8.8.8.8
 d-i netcfg/confirm_static boolean true
 d-i netcfg/get_hostname string debian
 d-i netcfg/get_domain string debian
+
+### Mirror settings
 d-i mirror/country string manual
-d-i mirror/http/hostname string ftp.debian.org/debian
+d-i mirror/http/hostname string ftp.debian.org/debian/
 d-i mirror/http/directory string /
+
 d-i mirror/http/proxy string
 d-i clock-setup/utc boolean true
 d-i clock-setup/ntp boolean true

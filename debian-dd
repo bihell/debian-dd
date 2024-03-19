@@ -79,8 +79,8 @@ d-i debian-installer/locale string en_US
 d-i debian-installer/language string en
 d-i debian-installer/country string CN
 d-i keyboard-configuration/xkb-keymap select us
-d-i passwd/user-fullname string digital-review lin
-d-i passwd/username string digital-review
+d-i passwd/user-fullname string tpxcer lin
+d-i passwd/username string tpxcer
 d-i passwd/root-password password $passwd
 d-i passwd/root-password-again password $passwd
 d-i passwd/user-password password Iamnotpassword

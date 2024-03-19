@@ -94,7 +94,7 @@ d-i netcfg/confirm_static boolean true
 d-i netcfg/get_hostname string debian
 d-i netcfg/get_domain string debian
 d-i mirror/country string manual
-d-i mirror/http/hostname string deb.debian.org/debian
+d-i mirror/http/hostname string ftp.debian.org/debian
 d-i mirror/http/directory string /
 d-i mirror/http/proxy string
 d-i clock-setup/utc boolean true

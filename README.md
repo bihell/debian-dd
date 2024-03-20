@@ -1,13 +1,21 @@
-# Debian-dd
+# Debian-DD
 
-## 0x01 debian 重装方式
+A Debian reinstallation script, currently only supports X86 64Bit platforms, reinstallation requires the original system to be debian or ubuntu. the script will not set ipv6.
 
-需要原系统是X86 64bit 平台的 debian 或者 ubuntu，然后执行以下命令：
+## 0x01 Usage
 
 ```
 bash <(curl -sL https://github.com/bihell/debian-dd/raw/main/debian-dd)
 ```
 
-## 0x02 VPS 购买
+## 0x02 VPS purchase
 
-欢迎参考我整理的 VPS 列表：[https://bigdata.icu/tools/vps.html](https://bigdata.icu/tools/vps.html)
+My VPS Documentation：[https://bigdata.icu/tools/vps.html](https://bigdata.icu/tools/vps.html)
+
+## 0x03 Subscribe to my channel
+
+[YouTube](https://www.youtube.com/channel/UCINmrFonh6v0VTyWhudSQ2w)、[bilibili](https://space.bilibili.com/88900889)、[xigua](https://www.ixigua.com/home/940801951008103)
+
+## 0x04 ScreenShot
+
+![](Screenshot.png)

@@ -85,10 +85,8 @@ echo -en "\n${aoiBlue}Download boot file...${plain}\n"
 
 rm -rf /netboot
 mkdir /netboot && cd /netboot
-
 wget https://ftp.debian.org/debian/dists/$debian_version/main/installer-amd64/current/images/netboot/debian-installer/amd64/linux
 wget https://ftp.debian.org/debian/dists/$debian_version/main/installer-amd64/current/images/netboot/debian-installer/amd64/initrd.gz
-
 
 # Get the name of the active network interface
 interface=$(ip -o link show | awk '$2 != "lo:" {print substr($2, 1, length($2)-1); exit}')

@@ -7,6 +7,7 @@ A Debian reinstallation script
 ## 0x01 Usage
 
 ```
+# Interactive scripting with support for hostname, ssh port, password and bbr settings
 apt update
 apt install curl wget net-tools -y
 bash <(curl -sL https://github.com/bihell/debian-dd/raw/main/debian-dd)

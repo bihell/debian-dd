@@ -28,9 +28,9 @@ echo -e "${aoiBlue}bilibili${plain}：https://space.bilibili.com/88900889"
 echo -e "${aoiBlue}xigua${plain}：https://www.ixigua.com/home/940801951008103"
 echo "-----------------------------------------------------------------"
 
-echo -en "\n${aoiBlue}Installation dependencies...${plain}\n"
-apt update
-apt install wget net-tools -y
+# echo -en "\n${aoiBlue}Installation dependencies...${plain}\n"
+# apt update
+# apt install wget net-tools -y
 
 echo -en "\n${aoiBlue}Supported Versions:${plain}\n"
 echo "[1] Debian 12 bookworm"

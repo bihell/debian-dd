@@ -75,6 +75,12 @@ if [ -z "$passwd" ]; then
 	sleep 1
 fi
 
+echo -ne "\n${aoiBlue}Set ssh port${plain}\n"
+read -p "Please input [Default 22]: " sshPORT
+if [ -z "$sshPORT" ]; then
+    sshPORT=22
+fi
+
 # Get the device number of the root directory
 root_device=$(df / | awk 'NR==2 {print $1}')
 
@@ -161,7 +167,7 @@ d-i partman/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 tasksel tasksel/first multiselect minimal
-d-i pkgsel/include string openssh-server lrzsz vim curl sudo
+d-i pkgsel/include string openssh-server lrzsz vim curl sudo wget net-tools
 d-i pkgsel/update-policy select none
 d-i pkgsel/upgrade select none
 d-i apt-setup/services-select multiselect
@@ -169,7 +175,8 @@ d-i grub-installer/grub2_instead_of_grub_legacy boolean true
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev string /dev/[sv]da
 d-i preseed/late_command string \
-chroot /target sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config;
+sed -ri 's/^#?PermitRootLogin.*/PermitRootLogin yes/g' /target/etc/ssh/sshd_config; \
+sed -ri 's/^#?Port.*/Port ${sshPORT}/g' /target/etc/ssh/sshd_config; 
 d-i finish-install/reboot_in_progress note
 EOF
 find . | cpio -H newc -o | gzip -6 > ../initrd.gz && cd ..

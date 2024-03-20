@@ -54,13 +54,13 @@ else
     exit
 fi
 
+echo -en "\n${aoiBlue}Start installing Debian $debian_version...${plain}\n"
+
 echo -en "\n${aoiBlue}Set hostname:${plain}\n"
 read -p "Please input [Default digital-review]:" HostName
 if [ -z "$HostName" ]; then
     HostName="digital-review"
 fi
-
-echo -en "\n${aoiBlue}Start installing Debian $debian_version...${plain}\n"
 
 echo -ne "\n${aoiBlue}Set root password${plain}\n"
 read -p "Please input [Enter directly to generate a random password]: " passwd
@@ -72,13 +72,24 @@ if [ -z "$passwd" ]; then
     passwd=$(tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\\]^_`{|}~' </dev/urandom | head -c $PASSWORD_LENGTH)
 
     echo -e "Generated password: ${red}$passwd${plain}"
-	sleep 1
 fi
 
 echo -ne "\n${aoiBlue}Set ssh port${plain}\n"
 read -p "Please input [Default 22]: " sshPORT
 if [ -z "$sshPORT" ]; then
     sshPORT=22
+fi
+
+echo -ne "\n${aoiBlue}Whether to enable BBR${plain}\n"
+read -p "Please input y/n [Default y]: " enableBBR
+if [[ "$enableBBR" =~ ^[Nn]$ ]]; then
+    # 如果 enableBBR 的值为 N 或 n，则将 BBR 设置为空
+    BBR=""
+else
+    # 否则设置 BBR 的值
+    bbr_path="/etc/sysctl.d/99-sysctl.conf"
+    target="in-target"
+    BBR="$target sed -i '\$anet.core.default_qdisc = fq' $bbr_path;$target sed -i '\$anet.core.rmem_max = 67108848' $bbr_path;$target sed -i '\$anet.core.wmem_max = 67108848' $bbr_path;$target sed -i '\$anet.core.somaxconn = 4096' $bbr_path;$target sed -i '\$anet.ipv4.tcp_max_syn_backlog = 4096' $bbr_path;$target sed -i '\$anet.ipv4.tcp_congestion_control = bbr' $bbr_path;$target sed -i '\$anet.ipv4.tcp_rmem = 16384 16777216 536870912' $bbr_path;$target sed -i '\$anet.ipv4.tcp_wmem = 16384 16777216 536870912' $bbr_path;$target sed -i '\$anet.ipv4.tcp_adv_win_scale = -2' $bbr_path;$target sed -i '\$anet.ipv4.tcp_sack = 1' $bbr_path;$target sed -i '\$anet.ipv4.tcp_timestamps = 1' $bbr_path;$target sed -i '\$akernel.panic = -1' $bbr_path;$target sed -i '\$avm.swappiness = 0' $bbr_path;"
 fi
 
 # Get the device number of the root directory
@@ -166,17 +177,22 @@ d-i partman-lvm/confirm_nooverwrite boolean true
 d-i partman/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
-tasksel tasksel/first multiselect minimal
-d-i pkgsel/include string openssh-server lrzsz vim curl sudo wget net-tools
+tasksel tasksel/first multiselect standard ssh-server
+d-i pkgsel/include string lrzsz net-tools vim
 d-i pkgsel/update-policy select none
 d-i pkgsel/upgrade select none
 d-i apt-setup/services-select multiselect
 d-i grub-installer/grub2_instead_of_grub_legacy boolean true
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev string /dev/[sv]da
+
+### Write preseed
 d-i preseed/late_command string \
 sed -ri 's/^#?PermitRootLogin.*/PermitRootLogin yes/g' /target/etc/ssh/sshd_config; \
-sed -ri 's/^#?Port.*/Port ${sshPORT}/g' /target/etc/ssh/sshd_config; 
+sed -ri 's/^#?Port.*/Port ${sshPORT}/g' /target/etc/ssh/sshd_config; \
+${BBR}
+
+### Shutdown machine
 d-i finish-install/reboot_in_progress note
 EOF
 find . | cpio -H newc -o | gzip -6 > ../initrd.gz && cd ..

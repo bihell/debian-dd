@@ -16,20 +16,26 @@ if [ "$EUID" -ne 0 ]; then
     exit
 fi
 
-echo "Welcome to use the Debian DD script by『数码乱炖』"
+echo "-----------------------------------------------------------------"
+echo "This script was written by『数码乱炖』"
 echo "If you have any questions, please raise an issue. "
-echo "GitHub: https://github.com/bihell/debian-dd"
-echo "VPS document: https://bigdata.icu/tools/vps.html"
-echo "-------------------------------------------------"
+echo -e "${aoiBlue}GitHub${plain}: https://github.com/bihell/debian-dd"
+echo -e "${aoiBlue}VPS document${plain}: https://bigdata.icu/tools/vps.html"
+echo "-----------------------------------------------------------------"
 echo "Welcome to subscribe to my channel"
-echo "youtube：https://www.youtube.com/channel/UCINmrFonh6v0VTyWhudSQ2w"
-echo "bilibili：https://space.bilibili.com/88900889"
-echo "xigua：https://www.ixigua.com/home/940801951008103"
-echo
-echo "Supported Versions:"
-echo "[1] Debian 12(bookworm)"
-echo "[2] Debian 11(bullseye)"
-echo "[3] Debian 10(buster)"
+echo -e "${aoiBlue}YouTube${plain}：https://www.youtube.com/channel/UCINmrFonh6v0VTyWhudSQ2w"
+echo -e "${aoiBlue}bilibili${plain}：https://space.bilibili.com/88900889"
+echo -e "${aoiBlue}xigua${plain}：https://www.ixigua.com/home/940801951008103"
+echo "-----------------------------------------------------------------"
+
+echo -en "\n${aoiBlue}Installation dependencies...${plain}\n"
+apt update
+apt install wget net-tools -y
+
+echo -en "\n${aoiBlue}Supported Versions:${plain}\n"
+echo "[1] Debian 12 bookworm"
+echo "[2] Debian 11 bullseye"
+echo "[3] Debian 10 buster"
 read -p "Please select [Default 1]:" version
 
 if [ -z "$version" ]; then
@@ -43,23 +49,29 @@ elif [ "$version" == "2" ]; then
 elif [ "$version" == "3" ]; then
     debian_version="buster"
 else 
-    echo "No correct option entered, ready to exit..."
+    echo -e "${aoiBlue}No correct option entered, ready to exit...${plain}"
     sleep 1
     exit
 fi
-	
-echo "Start installing Debian $debian_version..."
-echo
-echo "Set root password[default random password]:"
-read -p "Enter directly to generate a random password" passwd
+
+echo -en "\n${aoiBlue}Set hostname:${plain}\n"
+read -p "Please input [Default digital-review]:" HostName
+if [ -z "$HostName" ]; then
+    HostName="digital-review"
+fi
+
+echo -en "\n${aoiBlue}Start installing Debian $debian_version...${plain}\n"
+
+echo -ne "\n${aoiBlue}Set root password${plain}\n"
+read -p "Enter directly to generate a random password: " passwd
 if [ -z "$passwd" ]; then
 # Length of the password
-    PASSWORD_LENGTH=12
+    PASSWORD_LENGTH=16
 
     # Generate the password
-    passwd=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c $PASSWORD_LENGTH)
+    passwd=$(tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\\]^_`{|}~' </dev/urandom | head -c $PASSWORD_LENGTH)
 
-    echo "Generated password: ${yellow}$passwd${plain}"
+    echo -e "Generated password: ${red}$passwd${plain}"
 	sleep 1
 fi
 
@@ -69,12 +81,14 @@ root_device=$(df / | awk 'NR==2 {print $1}')
 # Extract the partition number from the device number
 partitionr_root_number=$(echo "$root_device" | grep -oE '[0-9]+$')
 
+echo -en "\n${aoiBlue}Download boot file...${plain}\n"
+
+rm -rf /netboot
 mkdir /netboot && cd /netboot
-apt install wget -y
+
 wget https://ftp.debian.org/debian/dists/$debian_version/main/installer-amd64/current/images/netboot/debian-installer/amd64/linux
 wget https://ftp.debian.org/debian/dists/$debian_version/main/installer-amd64/current/images/netboot/debian-installer/amd64/initrd.gz
 
-apt install net-tools -y
 
 # Get the name of the active network interface
 interface=$(ip -o link show | awk '$2 != "lo:" {print substr($2, 1, length($2)-1); exit}')
@@ -88,7 +102,7 @@ netmask=$(ifconfig $interface | awk '/netmask / {print $4}')
 # Get Gateway
 gateway=$(ip route | awk '/default/ {print $3}')
 
-echo "Start configuring pre-installed file..."
+echo -e "${aoiBlue}Start configuring pre-installed file...${plain}"
 mkdir temp_initrd
 cd temp_initrd
 gunzip -c ../initrd.gz | cpio -i
@@ -110,8 +124,11 @@ d-i netcfg/get_netmask string $netmask
 d-i netcfg/get_gateway string $gateway
 d-i netcfg/get_nameservers string 1.1.1.1 8.8.8.8
 d-i netcfg/confirm_static boolean true
-d-i netcfg/get_hostname string debian
-d-i netcfg/get_domain string debian
+
+### hostname and domain
+# d-i netcfg/hostname string $HostName
+# d-i netcfg/get_domain string unassigned-domain
+d-i netcfg/hostname string $HostName
 
 ### Mirror settings
 d-i mirror/country string manual
@@ -146,7 +163,7 @@ d-i partman/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 tasksel tasksel/first multiselect minimal
-d-i pkgsel/include string openssh-server
+d-i pkgsel/include string openssh-server lrzsz
 d-i pkgsel/update-policy select none
 d-i pkgsel/upgrade select none
 d-i apt-setup/services-select multiselect
@@ -159,7 +176,6 @@ d-i finish-install/reboot_in_progress note
 EOF
 find . | cpio -H newc -o | gzip -6 > ../initrd.gz && cd ..
 rm -rf temp_initrd 
-echo "Configuration complete..."
 cat << EOF >> /etc/grub.d/40_custom
 menuentry "Digital-Review Debian Installer AMD64" {
     set root="(hd0,$partitionr_root_number)"
@@ -175,5 +191,7 @@ sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=2/' /etc/default/grub
 
 update-grub 
 
-echo -ne "\n[${green}Finish${plain}] Input '${yellow}reboot${plain}' to continue the subsequential installation.\n"
+echo -en "\n${aoiBlue}Configuration complete...${plain}\n"
+
+echo -ne "\n[${aoiBlue}Finish${plain}] Input '${red}reboot${plain}' to continue the subsequential installation.\n"
 exit 1

@@ -1,54 +1,72 @@
 #!/bin/bash
 
+# color
+underLine='\033[4m'
+aoiBlue='\033[36m'
+blue='\033[34m'
+yellow='\033[33m'
+green='\033[32m'
+red='\033[31m'
+plain='\033[0m'
+
 clear
 # 检查是否是 root 用户
 if [ "$EUID" -ne 0 ]; then
-    echo "错误：请使用 root 用户执行此脚本。"
+    echo "Error: Please use the root user to execute this script."
     exit
 fi
 
-echo "Hello! 欢迎使用数码乱炖的的dd系统脚本"
-echo "有问题请提 issue，GitHub 地址：https://github.com/bihell/debian-dd"
-echo "VPS 服务器整理：https://bigdata.icu/tools/vps.html"
-echo "油管：https://www.youtube.com/channel/UCINmrFonh6v0VTyWhudSQ2w"
-echo "B站：https://space.bilibili.com/88900889"
-echo "西瓜：https://space.bilibili.com/88900889"
+echo "Welcome to use the Debian DD script by『数码乱炖』"
+echo "If you have any questions, please raise an issue. "
+echo "GitHub: https://github.com/bihell/debian-dd"
+echo "VPS document: https://bigdata.icu/tools/vps.html"
+echo "-------------------------------------------------"
+echo "Welcome to subscribe to my channel"
+echo "youtube：https://www.youtube.com/channel/UCINmrFonh6v0VTyWhudSQ2w"
+echo "bilibili：https://space.bilibili.com/88900889"
+echo "xigua：https://www.ixigua.com/home/940801951008103"
 echo
-echo "支持的版本:"
-echo "[1] Debian 12 <bookworm> 版本号 12.5"
-echo "[2] Debian 11 <bullseye> 版本号 11.9"
-echo "[3] Debian 10 <buster> 版本号 10.13"
-read -p "请选择[默认1]：" version
+echo "Supported Versions:"
+echo "[1] Debian 12(bookworm)"
+echo "[2] Debian 11(bullseye)"
+echo "[3] Debian 10(buster)"
+read -p "Please select [Default 1]:" version
 
 if [ -z "$version" ]; then
     version=0
 fi
 
 if [ "$version" == "0" ] || [ "$version" == "1" ]; then
-    debian_version="Debian12.5"
+    debian_version="bookworm"
 elif [ "$version" == "2" ]; then
-    debian_version="Debian11.9"
+    debian_version="bullseye"
 elif [ "$version" == "3" ]; then
-    debian_version="Debian10.13"
+    debian_version="buster"
 else 
-    echo "未输入正确的选项,准备退出..."
+    echo "No correct option entered, ready to exit..."
     sleep 1
     exit
 fi
 	
-echo "即将安装$debian_version..."
+echo "Start installing Debian $debian_version..."
 echo
-echo "设置root密码[默认digital-review]:"
-read -p "建议强密码[直接回车则是默认密码]" passwd
+echo "Set root password[default random password]:"
+read -p "Enter directly to generate a random password" passwd
 if [ -z "$passwd" ]; then
-	passwd="digital-review"
-	echo "重装好之后请立刻登陆修改root密码！！！"
+# Length of the password
+    PASSWORD_LENGTH=12
+
+    # Generate the password
+    passwd=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c $PASSWORD_LENGTH)
+
+    echo "Generated password: ${yellow}$passwd${plain}"
 	sleep 1
 fi
 
-# 获取根目录的设备号
+# Get the device number of the root directory
 root_device=$(df / | awk 'NR==2 {print $1}')
-# 从设备号中提取分区号
+
+# Extract the partition number from the device number
 partitionr_root_number=$(echo "$root_device" | grep -oE '[0-9]+$')
 
 mkdir /netboot && cd /netboot
@@ -57,19 +75,20 @@ wget https://ftp.debian.org/debian/dists/$debian_version/main/installer-amd64/cu
 wget https://ftp.debian.org/debian/dists/$debian_version/main/installer-amd64/current/images/netboot/debian-installer/amd64/initrd.gz
 
 apt install net-tools -y
-# 获取活动网络接口名称
+
+# Get the name of the active network interface
 interface=$(ip -o link show | awk '$2 != "lo:" {print substr($2, 1, length($2)-1); exit}')
 
-# 获取IP地址
+# Get IP address
 ip=$(ifconfig $interface | awk '/inet / {print $2}')
 
-# 获取子网掩码
+# Get subnet mask
 netmask=$(ifconfig $interface | awk '/netmask / {print $4}')
 
-# 获取网关
+# Get Gateway
 gateway=$(ip route | awk '/default/ {print $3}')
 
-echo "开始配置preseed.cfg..."
+echo "Start configuring pre-installed file..."
 mkdir temp_initrd
 cd temp_initrd
 gunzip -c ../initrd.gz | cpio -i
@@ -140,7 +159,7 @@ d-i finish-install/reboot_in_progress note
 EOF
 find . | cpio -H newc -o | gzip -6 > ../initrd.gz && cd ..
 rm -rf temp_initrd 
-echo "配置完成，即将开始重装..."
+echo "Configuration complete..."
 cat << EOF >> /etc/grub.d/40_custom
 menuentry "Digital-Review Debian Installer AMD64" {
     set root="(hd0,$partitionr_root_number)"
@@ -149,9 +168,12 @@ menuentry "Digital-Review Debian Installer AMD64" {
 }
 EOF
 
-# 修改GRUB_DEFAULT选项
+# Modifying the GRUB DEFAULT option
 sed -i 's/^GRUB_DEFAULT=.*/GRUB_DEFAULT=2/' /etc/default/grub
-# 修改GRUB_TIMEOUT选项
+# Modify the GRUB TIMEOUT option
 sed -i 's/^GRUB_TIMEOUT=.*/GRUB_TIMEOUT=2/' /etc/default/grub
 
-update-grub && reboot
+update-grub 
+
+echo -ne "\n[${green}Finish${plain}] Input '${yellow}reboot${plain}' to continue the subsequential installation.\n"
+exit 1

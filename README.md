@@ -1,6 +1,8 @@
 # Debian-DD
 
-A Debian reinstallation script, currently only supports X86 64Bit platforms, reinstallation requires the original system to be debian or ubuntu. the script will not set ipv6.
+A Debian reinstallation script
+
+**Currently only supports X86 64Bit platforms, reinstallation requires the original system to be debian or ubuntu. the script will not set ipv6.**
 
 ## 0x01 Usage
 

@@ -63,7 +63,7 @@ fi
 echo -en "\n${aoiBlue}Start installing Debian $debian_version...${plain}\n"
 
 echo -ne "\n${aoiBlue}Set root password${plain}\n"
-read -p "Enter directly to generate a random password: " passwd
+read -p "Please input [Enter directly to generate a random password]: " passwd
 if [ -z "$passwd" ]; then
 # Length of the password
     PASSWORD_LENGTH=16

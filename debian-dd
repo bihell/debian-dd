@@ -178,7 +178,7 @@ d-i partman/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
 tasksel tasksel/first multiselect standard ssh-server
-d-i pkgsel/include string lrzsz net-tools vim
+d-i pkgsel/include string lrzsz net-tools vim rsync
 d-i pkgsel/update-policy select none
 d-i pkgsel/upgrade select none
 d-i apt-setup/services-select multiselect

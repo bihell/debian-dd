@@ -131,7 +131,10 @@ d-i passwd/make-user boolean false
 d-i passwd/root-password password $passwd
 d-i passwd/root-password-again password $passwd
 d-i user-setup/allow-password-weak boolean true
+
+### Network configuration
 d-i netcfg/choose_interface select auto
+d-i netcfg/disable_autoconfig boolean true
 d-i netcfg/dhcp_failed note
 d-i netcfg/dhcp_options select Configure network manually
 d-i netcfg/get_ipaddress string $ip
@@ -140,9 +143,10 @@ d-i netcfg/get_gateway string $gateway
 d-i netcfg/get_nameservers string 1.1.1.1 8.8.8.8
 d-i netcfg/confirm_static boolean true
 
-### hostname and domain
-# d-i netcfg/hostname string $HostName
-# d-i netcfg/get_domain string unassigned-domain
+### Low memory mode
+d-i lowmem/low note
+
+### hostname
 d-i netcfg/hostname string $HostName
 
 ### Mirror settings
@@ -177,11 +181,15 @@ d-i partman-lvm/confirm_nooverwrite boolean true
 d-i partman/confirm_write_new_label boolean true
 d-i partman/choose_partition select finish
 d-i partman/confirm boolean true
-tasksel tasksel/first multiselect standard ssh-server
+
+### Package selection
+tasksel tasksel/first multiselect minimal ssh-server
 d-i pkgsel/include string lrzsz net-tools vim rsync socat curl sudo
+
+# Automatic updates are not applied, everything is updated manually.
 d-i pkgsel/update-policy select none
 d-i pkgsel/upgrade select none
-d-i apt-setup/services-select multiselect
+
 d-i grub-installer/grub2_instead_of_grub_legacy boolean true
 d-i grub-installer/only_debian boolean true
 d-i grub-installer/bootdev string /dev/[sv]da

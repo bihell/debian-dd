@@ -5,6 +5,8 @@ A Debian reinstallation script, currently only supports X86 64Bit platforms, rei
 ## 0x01 Usage
 
 ```
+apt update
+apt install curl wget net-tools -y
 bash <(curl -sL https://github.com/bihell/debian-dd/raw/main/debian-dd)
 ```
 

@@ -81,15 +81,15 @@ if [ -z "$sshPORT" ]; then
 fi
 
 echo -ne "\n${aoiBlue}Whether to enable BBR${plain}\n"
-read -p "Please input y/n [Default y]: " enableBBR
-if [[ "$enableBBR" =~ ^[Nn]$ ]]; then
-    # 如果 enableBBR 的值为 N 或 n，则将 BBR 设置为空
-    BBR=""
-else
+read -p "Please input y/n [Default n]: " enableBBR
+if [[ "$enableBBR" =~ ^[Yy]$ ]]; then
     # 否则设置 BBR 的值
     bbr_path="/etc/sysctl.d/99-sysctl.conf"
     target="in-target"
     BBR="$target sed -i '\$anet.core.default_qdisc = fq' $bbr_path;$target sed -i '\$anet.core.rmem_max = 67108848' $bbr_path;$target sed -i '\$anet.core.wmem_max = 67108848' $bbr_path;$target sed -i '\$anet.core.somaxconn = 4096' $bbr_path;$target sed -i '\$anet.ipv4.tcp_max_syn_backlog = 4096' $bbr_path;$target sed -i '\$anet.ipv4.tcp_congestion_control = bbr' $bbr_path;$target sed -i '\$anet.ipv4.tcp_rmem = 16384 16777216 536870912' $bbr_path;$target sed -i '\$anet.ipv4.tcp_wmem = 16384 16777216 536870912' $bbr_path;$target sed -i '\$anet.ipv4.tcp_adv_win_scale = -2' $bbr_path;$target sed -i '\$anet.ipv4.tcp_sack = 1' $bbr_path;$target sed -i '\$anet.ipv4.tcp_timestamps = 1' $bbr_path;$target sed -i '\$akernel.panic = -1' $bbr_path;$target sed -i '\$avm.swappiness = 0' $bbr_path;"
+else
+    # 如果 enableBBR 的值为 N 或 n，则将 BBR 设置为空
+    BBR=""
 fi
 
 # Get the device number of the root directory

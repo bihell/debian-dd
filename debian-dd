@@ -202,7 +202,7 @@ d-i partman/confirm boolean true
 
 ### Package selection
 tasksel tasksel/first multiselect minimal ssh-server
-d-i pkgsel/include string lrzsz net-tools vim rsync socat curl sudo wget telnet iptables gpg zsh python3 pip
+d-i pkgsel/include string lrzsz net-tools vim rsync socat curl sudo wget telnet iptables gpg zsh python3 pip nmap
 
 # Automatic updates are not applied, everything is updated manually.
 d-i pkgsel/update-policy select none

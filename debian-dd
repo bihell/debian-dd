@@ -69,7 +69,7 @@ if [ -z "$passwd" ]; then
     PASSWORD_LENGTH=16
 
     # Generate the password
-    passwd=$(tr -dc 'A-Za-z0-9!"#$%&'\''()*+,-./:;<=>?@[\\]^_`{|}~' </dev/urandom | head -c $PASSWORD_LENGTH)
+    passwd=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c $PASSWORD_LENGTH)
 
     echo -e "Generated password: ${red}$passwd${plain}"
 fi
